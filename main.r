@@ -16,8 +16,8 @@ Vdata_name = paste0(data_name,"_Average_Velocity")
 load(Ddata_name)
 load(Vdata_name)
 
-genotype_names <- names(genotypes) 
-geno_vector    <- unname(unlist(genotypes)) 
+genotype_names <- names(genotypes)
+geno_vector    <- unname(unlist(genotypes))
 geno_numbers <- as.numeric(sub("Genotype", "", genotype_names))
 sample_names <- paste0("sample-", geno_numbers)
 
@@ -55,10 +55,8 @@ TD_DKO = cbind(D[,DKO_cols])
 TD_PTZ = cbind(D[,PTZ_cols])
 TD_Lam = cbind(D[,Lam_cols])
 
-}              
-               
-            
-               
+}
+
 MV_WT = NULL
 MV_aKO = NULL
 MV_bKO = NULL
@@ -70,4 +68,3 @@ TD_aKO = NULL
 TD_bKO = NULL
 TD_DKO = NULL
 TD_PTZ = NULL
-

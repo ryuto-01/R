@@ -89,11 +89,11 @@ mean_aKO = mean(TD_aKO)
 mean_bKO = mean(TD_bKO)
 mean_DKO = mean(TD_DKO)
 
-sd_WT = sd(TD_WT)  
-sd_PTZ = sd(TD_PTZ)  
-sd_aKO = sd(TD_aKO)  
-sd_bKO = sd(TD_bKO)  
-sd_DKO = sd(TD_DKO) 
+sd_WT = sd(TD_WT)
+sd_PTZ = sd(TD_PTZ)
+sd_aKO = sd(TD_aKO)
+sd_bKO = sd(TD_bKO)
+sd_DKO = sd(TD_DKO)
 
 Distance_summary = data.frame(sample = c("WT","WT\n+PTZ","scn1laa\nKO","scn1lab_sa16474\nKO","DKO"),
                       mean = c(mean_WT,mean_PTZ,mean_aKO,mean_bKO,mean_DKO),
@@ -118,22 +118,19 @@ colnames(TD_DKO)[2] = "sample"
 
 
 ggplot(NULL)+
-  scale_x_discrete(limit=c('WT','WT\n+PTZ','scn1laa\nKO','scn1lab_sa16474\nKO','DKO'))+  
-  
+  scale_x_discrete(limit=c('WT','WT\n+PTZ','scn1laa\nKO','scn1lab_sa16474\nKO','DKO'))+
   geom_bar(data = Distance_summary,aes(x = sample,y = mean,fill = sample),stat = "identity",width = 0.8)+
   geom_errorbar(data = Distance_summary,aes(x = sample,ymin = mean - se,ymax = mean + se),width = 0.4)+
-
   geom_beeswarm(data = TD_WT,aes(x=sample,y=TD_WT[,1]),stat="identity",size=1.25,cex = 2)+
   geom_beeswarm(data = TD_PTZ,aes(x=sample,y=TD_PTZ[,1]),stat="identity",size=1.25,cex = 2)+
   geom_beeswarm(data = TD_aKO,aes(x=sample,y=TD_aKO[,1]),stat="identity",size=1.25,cex = 2)+
   geom_beeswarm(data = TD_bKO, aes(x=sample, y=TD_bKO[,1]),stat="identity",size=1.25,cex = 2)+
   geom_beeswarm(data = TD_DKO,aes(x=sample,y=TD_DKO[,1]),stat="identity",size=1.25,cex = 2)+
-  
   theme_classic()+
-  theme(legend.position = 'none')+  
+  theme(legend.position = 'none')+
   labs(x=NULL, y="総移動距離 [mm]")+
   theme(axis.title = element_text(size=30),text = element_text(size=28,face = "bold"))+
-  scale_y_continuous(expand = c(0,0),limits = c(0,1710))+ 
+  scale_y_continuous(expand = c(0,0),limits = c(0,1710))+
   scale_fill_manual(values=c("#c5c5c5","#c5c5c5","#c5c5c5","#c5c5c5","#c5c5c5"))
 
 ggsave(file="TotalDistance_scn1laa_scn1lab_y609.png",height = 3.8,width = 15 )#3.8
@@ -176,10 +173,10 @@ mean_aKO = mean(MV_aKO)
 mean_bKO = mean(MV_bKO)
 mean_DKO = mean(MV_DKO)
 
-sd_WT = sd(MV_WT)  
+sd_WT = sd(MV_WT)
 sd_PTZ = sd(MV_PTZ)
-sd_aKO = sd(MV_aKO) 
-sd_bKO = sd(MV_bKO) 
+sd_aKO = sd(MV_aKO)
+sd_bKO = sd(MV_bKO)
 sd_DKO = sd(MV_DKO)
 
 MV_WT = data.frame(MV_WT)
@@ -192,7 +189,7 @@ MV_WT = cbind(MV_WT,"WT")
 colnames(MV_WT)[2] = "sample"
 MV_PTZ = cbind(MV_PTZ,"WT\n+PTZ")
 colnames(MV_PTZ)[2] = "sample"
-MV_aKO = cbind(MV_aKO,"scn1laa\nKO") 
+MV_aKO = cbind(MV_aKO,"scn1laa\nKO")
 colnames(MV_aKO)[2] = "sample"
 MV_bKO = cbind(MV_bKO,"scn1lab\ny609\nKO")
 colnames(MV_bKO)[2] = "sample"
@@ -206,17 +203,14 @@ Velocity_summary = data.frame(sample = c("WT","WT\n+PTZ","scn1laa\nKO","scn1lab\
 
 #グラフ作成
 ggplot(NULL)+
-  scale_x_discrete(limit=c('WT','WT\n+PTZ','scn1laa\nKO','scn1lab\ny609\nKO','DKO'))+  
-  
+  scale_x_discrete(limit=c('WT','WT\n+PTZ','scn1laa\nKO','scn1lab\ny609\nKO','DKO'))+
   geom_bar(data = Velocity_summary,aes(x = sample,y = mean,fill = sample),stat = "identity",width = 0.8)+
   geom_errorbar(data = Velocity_summary,aes(x = sample,ymin = mean - se,ymax = mean + se),width = 0.4)+
-  
   geom_beeswarm(data = MV_WT,aes(x=sample,y=MV_WT),stat="identity",size=1.5,cex = 2)+
   geom_beeswarm(data = MV_PTZ,aes(x=sample,y=MV_PTZ),stat="identity",size=1.5,cex = 2)+
   geom_beeswarm(data = MV_aKO,aes(x=sample,y=MV_aKO),stat="identity",size=1.5,cex = 2)+
   geom_beeswarm(data = MV_bKO, aes(x=sample, y=MV_bKO),stat="identity",size=1.5,cex = 2)+
   geom_beeswarm(data = MV_DKO,aes(x=sample,y=MV_DKO),stat="identity",size=1.5,cex = 2)+
-  
   theme_classic()+
   theme(legend.position = 'none')+  #凡例削除
   labs(x=NULL, y="最高速度 [mm/s]")+

@@ -29,10 +29,10 @@ for(i in seq_along(sheet_num)){
     TEMP.D[j] = TEMP.D[j-1] + TEMP.D[j]
   }
   D=cbind(D,TEMP.D)
-  V=cbind(V,TEMP.V)　
-  colnames(D)[i]=sprintf("sample-%s",i)　#%s iによってsample名が変わる
-  colnames(V)[i]=sprintf("sample-%s",i)　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
-} 
+  V=cbind(V,TEMP.V)
+  colnames(D)[i]=sprintf("sample-%s",i) #%s iによってsample名が変わる
+  colnames(V)[i]=sprintf("sample-%s",i)
+}
 
 #データ名から無駄な部分を削除、以降使用する
 data_name = gsub("/mnt/hdd1/hdd/OneDrive平田研共有フォルダ/Members/滝嶋遼/EthoVision Rawdata Excel/","",data_name)
@@ -56,7 +56,6 @@ for(i in 1 : (nrow(V)-window.size+ + 1)){
 }
 
 #平均速度を保存
-data_rename = paste0(data_name,"_Average_Velocity")    
+data_rename = paste0(data_name,"_Average_Velocity")
 save(Vave,file=data_rename)
 }
-
