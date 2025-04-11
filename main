@@ -1,0 +1,73 @@
+library(jsonlite)
+
+folder_path = "/mnt/hdd1/hdd/OneDrive平田研共有フォルダ/Members/滝嶋遼/genotype"
+file_list = list.files(path = folder_path, pattern = "\\.json$", full.names = TRUE)
+
+for(file_name in file_list){
+
+genotypes = fromJSON(file_name)
+
+data_name = gsub("/mnt/hdd1/hdd/OneDrive平田研共有フォルダ/Members/滝嶋遼/genotype/genotype_","",file_name)
+data_name = gsub(".json","",data_name)
+
+Ddata_name = paste0(data_name,"_Total_Distance")
+Vdata_name = paste0(data_name,"_Average_Velocity")
+
+load(Ddata_name)
+load(Vdata_name)
+
+genotype_names <- names(genotypes) 
+geno_vector    <- unname(unlist(genotypes)) 
+geno_numbers <- as.numeric(sub("Genotype", "", genotype_names))
+sample_names <- paste0("sample-", geno_numbers)
+
+genotype_df <- data.frame(
+  sample_col = sample_names,
+  genotype   = geno_vector,
+  stringsAsFactors = FALSE
+)
+
+wt_cols     <- genotype_df$sample_col[genotype_df$genotype == "WT"]
+aKO_cols    <- genotype_df$sample_col[genotype_df$genotype == "kcc2aKO"]
+bKO_cols    <- genotype_df$sample_col[genotype_df$genotype == "kcc2bKO"]
+DKO_cols    <- genotype_df$sample_col[genotype_df$genotype == "kcc2DKO"]
+PTZ_cols    <- genotype_df$sample_col[genotype_df$genotype == "PTZ"]
+Lam_cols    <- genotype_df$sample_col[genotype_df$genotype == "Lam"]
+
+wt_cols = intersect(wt_cols,colnames(D))
+bKO_cols = intersect(bKO_cols,colnames(D))
+aKO_cols = intersect(aKO_cols,colnames(D))
+DKO_cols = intersect(DKO_cols,colnames(D))
+PTZ_cols = intersect(PTZ_cols,colnames(D))
+Lam_cols = intersect(Lam_cols,colnames(D))
+
+MV_WT = cbind(MV_WT,V[,wt_cols])
+MV_aKO = cbind(MV_aKO,V[,aKO_cols])
+MV_bKO = cbind(MV_bKO,V[,bKO_cols])
+MV_DKO = cbind(MV_DKO,V[,DKO_cols])
+MV_PTZ = cbind(MV_PTZ,V[,PTZ_cols])
+MV_Lam = cbind(MV_Lam,V[,Lam_cols])
+
+TD_WT = cbind(D[,wt_cols])
+TD_aKO = cbind(D[,aKO_cols])
+TD_bKO = cbind(D[,bKO_cols])
+TD_DKO = cbind(D[,DKO_cols])
+TD_PTZ = cbind(D[,PTZ_cols])
+TD_Lam = cbind(D[,Lam_cols])
+
+}              
+               
+            
+               
+MV_WT = NULL
+MV_aKO = NULL
+MV_bKO = NULL
+MV_DKO = NULL
+MV_PTZ = NULL
+MV_Lam = NULL
+TD_WT = NULL
+TD_aKO = NULL
+TD_bKO = NULL
+TD_DKO = NULL
+TD_PTZ = NULL
+
