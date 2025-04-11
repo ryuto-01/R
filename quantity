@@ -1,0 +1,242 @@
+##総移動距離
+load("TotalDistance_WT")
+load("TotalDistance_WT_PTZ")
+load("TotalDistance_scn1laa_KO")
+load("TotalDistance_scn1lab.sa16474_KO")
+load("TotalDistance_scn1laa_scn1lab.sa16474_DKO")
+load("TotalDistance_scn1lab.y609_KO")
+load("TotalDistance_scn1laa_scn1lab.y609_DKO")
+
+#平均値算出
+compute_average = function(data,col_range){
+  ave_data = apply(data[,col_range],1,mean)
+  ave_data = data.frame(time = data$time, ave_data)
+  return(ave_data)
+}
+
+TD_ave_WT = compute_average(TD_WT, 2:16)
+TD_ave_aKO = compute_average(TD_aKO, 2:14)
+TD_ave_bKO = compute_average(TD_bKO, 2:25)
+TD_ave_DKO = compute_average(TD_DKO, 2:29)
+
+#列名変更
+change_rowname = function(data){
+  data_name = colnames(data)
+  data_rename = paste0("V",seq_along(data_name[-1]))
+  colnames(data)[-1] = data_rename
+  data = melt(data,id.vars = "time",measure.vars = colnames(data)[-1])
+  return(data)
+}
+
+TD_WT=change_rowname(TD_WT)
+TD_aKO=change_rowname(TD_aKO)
+TD_bKO=change_rowname(TD_bKO)
+TD_DKO=change_rowname(TD_DKO)
+
+#グラフ化、保存
+plot_distance = function(dis_data,ave_data){
+  ggplot(NULL)+
+    geom_line(data=dis_data,aes(x=time,y=value,group=variable),color="dimgray")+
+    geom_line(data=ave_data,aes(x=time,y=ave_data),color="red")+
+    theme_classic()+
+    ylim(0,2000)+
+    #labs(x="時間 [s]",y="移動距離 [mm]")+
+    theme(axis.title.y = element_blank(),axis.title.x = element_blank())+
+    scale_x_continuous(breaks=c(0,120,300,480))+
+    geom_vline(ntercept = 120,linetype="dashed",color = "gray")+
+    geom_vline(xintercept = 300,linetype="dashed",color = "gray")+
+    geom_rect(aes(xmin = 120, xmax = 300, ymin = -Inf, ymax = Inf),fill = "red", alpha = 0.1) +
+    theme(axis.title = element_text(size=23),text=element_text(size=22))
+}
+
+plot_distance(TD_WT,TD_ave_WT)
+ggsave(file="TotalDistance_WT.png",height = 5,width = 4.5)
+
+plot_distance(TD_aKO,TD_ave_aKO)
+ggsave(file="TotalDistance_a.mut.png",height = 5,width = 4)
+
+plot_distance(TD_bKO,TD_ave_bKO)
+ggsave(file="TotalDistance_b_sa16474.mut.png",height = 5,width = 4)
+
+plot_distance(TD_DKO,TD_ave_DKO)
+ggsave(file="TotalDistance_a.mut_b_sa16474.mut.png",height = 5,width = 4)
+
+#プロット
+load("TotalDistance_WT")
+load("TotalDistance_WT_PTZ")
+load("TotalDistance_scn1laa_KO")
+load("TotalDistance_scn1lab.sa16474_KO")
+load("TotalDistance_scn1laa_scn1lab.sa16474_DKO")
+load("TotalDistance_scn1lab.y609_KO")
+load("TotalDistance_scn1laa_scn1lab.y609_DKO")
+
+TD_WT = TD_WT[14386,2:16]
+TD_PTZ = TD_PTZ[14386,2:17]
+TD_aKO = TD_aKO[14386,2:14]
+TD_bKO = TD_bKO[14386,2:25]
+TD_DKO = TD_DKO[14386,2:29]
+
+{
+TD_WT = t(TD_WT)
+TD_PTZ = t(TD_PTZ)
+TD_aKO = t(TD_aKO)
+TD_bKO = t(TD_bKO)
+TD_DKO = t(TD_DKO)
+
+mean_WT = mean(TD_WT)
+mean_PTZ = mean(TD_PTZ)
+mean_aKO = mean(TD_aKO)
+mean_bKO = mean(TD_bKO)
+mean_DKO = mean(TD_DKO)
+
+sd_WT = sd(TD_WT)  
+sd_PTZ = sd(TD_PTZ)  
+sd_aKO = sd(TD_aKO)  
+sd_bKO = sd(TD_bKO)  
+sd_DKO = sd(TD_DKO) 
+
+Distance_summary = data.frame(sample = c("WT","WT\n+PTZ","scn1laa\nKO","scn1lab_sa16474\nKO","DKO"),
+                      mean = c(mean_WT,mean_PTZ,mean_aKO,mean_bKO,mean_DKO),
+                      se = c(sd_WT,sd_PTZ,sd_aKO,sd_bKO,sd_DKO))
+
+TD_WT = data.frame(TD_WT)
+TD_WT = cbind(TD_WT,"WT")
+colnames(TD_WT)[2] = "sample"
+TD_PTZ = data.frame(TD_PTZ)
+TD_PTZ = cbind(TD_PTZ,"WT\n+PTZ")
+colnames(TD_PTZ)[2] = "sample"
+TD_aKO = data.frame(TD_aKO)
+TD_aKO = cbind(TD_aKO,"scn1laa\nKO")
+colnames(TD_aKO)[2] = "sample"
+TD_bKO = data.frame(TD_bKO)
+TD_bKO = cbind(TD_bKO,"scn1lab_sa16474\nKO")
+colnames(TD_bKO)[2] = "sample"
+TD_DKO = data.frame(TD_DKO)
+TD_DKO = cbind(TD_DKO,"DKO")
+colnames(TD_DKO)[2] = "sample"
+}
+
+
+ggplot(NULL)+
+  scale_x_discrete(limit=c('WT','WT\n+PTZ','scn1laa\nKO','scn1lab_sa16474\nKO','DKO'))+  
+  
+  geom_bar(data = Distance_summary,aes(x = sample,y = mean,fill = sample),stat = "identity",width = 0.8)+
+  geom_errorbar(data = Distance_summary,aes(x = sample,ymin = mean - se,ymax = mean + se),width = 0.4)+
+
+  geom_beeswarm(data = TD_WT,aes(x=sample,y=TD_WT[,1]),stat="identity",size=1.25,cex = 2)+
+  geom_beeswarm(data = TD_PTZ,aes(x=sample,y=TD_PTZ[,1]),stat="identity",size=1.25,cex = 2)+
+  geom_beeswarm(data = TD_aKO,aes(x=sample,y=TD_aKO[,1]),stat="identity",size=1.25,cex = 2)+
+  geom_beeswarm(data = TD_bKO, aes(x=sample, y=TD_bKO[,1]),stat="identity",size=1.25,cex = 2)+
+  geom_beeswarm(data = TD_DKO,aes(x=sample,y=TD_DKO[,1]),stat="identity",size=1.25,cex = 2)+
+  
+  theme_classic()+
+  theme(legend.position = 'none')+  
+  labs(x=NULL, y="総移動距離 [mm]")+
+  theme(axis.title = element_text(size=30),text = element_text(size=28,face = "bold"))+
+  scale_y_continuous(expand = c(0,0),limits = c(0,1710))+ 
+  scale_fill_manual(values=c("#c5c5c5","#c5c5c5","#c5c5c5","#c5c5c5","#c5c5c5"))
+
+ggsave(file="TotalDistance_scn1laa_scn1lab_y609.png",height = 3.8,width = 15 )#3.8
+
+
+###ttest######
+t.test(TD_WT[,1],TD_aKO[,1])   #WT vs a  0.8149
+t.test(TD_WT[,1],TD_bKO[,1])   #WT vs b  1.944e-05
+t.test(TD_WT[,1],TD_DKO[,1])  #WT vs DKO  0.000294
+t.test(TD_aKO[,1],TD_bKO[,1])  #a vs b  2.41e-05
+t.test(TD_aKO[,1],TD_DKO[,1]) #a vs DKO  0.0003576
+t.test(TD_bKO[,1],TD_DKO[,1]) #b vs DKO  0.1383　D.p_PTZ
+t.test(TD_WT[,1],TD_PTZ[,1])   #PTZ vs WT  1.835e-11
+t.test(TD_PTZ[,1],TD_aKO[,1])   #PTZ vs a  3.655e-11
+t.test(TD_PTZ[,1],TD_bKO[,1])  #PTZ vs b  1.314e-08
+t.test(TD_PTZ[,1],TD_DKO[,1])  #PTZ vs DKO  2.572e-09
+
+
+
+
+#最大速度
+load("MaxVelocity_WT")
+load("MaxVelocity_WT_PTZ")
+load("MaxVelocity_scn1laa_KO")
+load("MaxVelocity_scn1lab.sa16474_KO")
+load("MaxVelocity_scn1laa_scn1lab.sa16474_DKO")
+load("MaxVelocity_scn1lab.y609_KO")
+load("MaxVelocity_scn1laa_scn1lab.y609_DKO")
+
+{
+MV_WT = apply(MV_WT,2,max)
+MV_PTZ = apply(MV_PTZ,2,max)
+MV_aKO = apply(MV_aKO,2,max)
+MV_bKO = apply(MV_bKO,2,max)
+MV_DKO = apply(MV_DKO,2,max)
+
+mean_WT = mean(MV_WT)
+mean_PTZ = mean(MV_PTZ)
+mean_aKO = mean(MV_aKO)
+mean_bKO = mean(MV_bKO)
+mean_DKO = mean(MV_DKO)
+
+sd_WT = sd(MV_WT)  
+sd_PTZ = sd(MV_PTZ)
+sd_aKO = sd(MV_aKO) 
+sd_bKO = sd(MV_bKO) 
+sd_DKO = sd(MV_DKO)
+
+MV_WT = data.frame(MV_WT)
+MV_PTZ = data.frame(MV_PTZ)
+MV_aKO = data.frame(MV_aKO)
+MV_bKO = data.frame(MV_bKO)
+MV_DKO = data.frame(MV_DKO)
+
+MV_WT = cbind(MV_WT,"WT")
+colnames(MV_WT)[2] = "sample"
+MV_PTZ = cbind(MV_PTZ,"WT\n+PTZ")
+colnames(MV_PTZ)[2] = "sample"
+MV_aKO = cbind(MV_aKO,"scn1laa\nKO") 
+colnames(MV_aKO)[2] = "sample"
+MV_bKO = cbind(MV_bKO,"scn1lab\ny609\nKO")
+colnames(MV_bKO)[2] = "sample"
+MV_DKO = cbind(MV_DKO,"DKO")
+colnames(MV_DKO)[2] = "sample"
+
+Velocity_summary = data.frame(sample = c("WT","WT\n+PTZ","scn1laa\nKO","scn1lab\ny609\nKO","DKO"),
+                              mean = c(mean_WT,mean_PTZ,mean_aKO,mean_bKO,mean_DKO),
+                              se = c(sd_WT,sd_PTZ,sd_aKO,sd_bKO,sd_DKO))
+}
+
+#グラフ作成
+ggplot(NULL)+
+  scale_x_discrete(limit=c('WT','WT\n+PTZ','scn1laa\nKO','scn1lab\ny609\nKO','DKO'))+  
+  
+  geom_bar(data = Velocity_summary,aes(x = sample,y = mean,fill = sample),stat = "identity",width = 0.8)+
+  geom_errorbar(data = Velocity_summary,aes(x = sample,ymin = mean - se,ymax = mean + se),width = 0.4)+
+  
+  geom_beeswarm(data = MV_WT,aes(x=sample,y=MV_WT),stat="identity",size=1.5,cex = 2)+
+  geom_beeswarm(data = MV_PTZ,aes(x=sample,y=MV_PTZ),stat="identity",size=1.5,cex = 2)+
+  geom_beeswarm(data = MV_aKO,aes(x=sample,y=MV_aKO),stat="identity",size=1.5,cex = 2)+
+  geom_beeswarm(data = MV_bKO, aes(x=sample, y=MV_bKO),stat="identity",size=1.5,cex = 2)+
+  geom_beeswarm(data = MV_DKO,aes(x=sample,y=MV_DKO),stat="identity",size=1.5,cex = 2)+
+  
+  theme_classic()+
+  theme(legend.position = 'none')+  #凡例削除
+  labs(x=NULL, y="最高速度 [mm/s]")+
+  theme(axis.title = element_text(size=25,face = "bold"),text = element_text(size=28,face = "bold"))+
+  scale_y_continuous(expand = c(0,0),limits = c(0,83))+
+  scale_fill_manual(values=c("#c5c5c5","#c5c5c5","#c5c5c5","#c5c5c5","#c5c5c5"))
+
+#グラフ保存
+ggsave("MaxVelocity_scn1la_a_b.y609.png",height = 3.8,width = 15)
+
+
+#t検定
+t.test(MV_WT[,1],MV_aKO[,1])   #WT vs a 0.77
+t.test(MV_WT[,1],MV_bKO[,1])   #WT vs b 0.001557
+t.test(MV_WT[,1],MV_DKO[,1])  #WT vs DKO 0.02612
+t.test(MV_aKO[,1],MV_bKO[,1])  #a vs b 4.329e-05
+t.test(MV_aKO[,1],MV_DKO[,1]) #a vs DKO 0.0009089
+t.test(MV_bKO[,1],MV_DKO[,1]) #b vs DKO 0.09802
+
+t.test(MV_WT[,1],Vmax_PTZ[,1])                #WT vs PTZ 2.413e-07
+t.test(MV_aKO[,1],Vmax_PTZ[,1])               #a vs PTZ 5.49e-12
+t.test(MV_bKO[,1],Vmax_PTZ[,1])               #b vs PTZ 0.0007892
+t.test(MV_DKO[,1],Vmax_PTZ[,1])              #DKO vs PTZ 8.892e-09
