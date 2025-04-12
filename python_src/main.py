@@ -15,10 +15,6 @@ file_list = [
     os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".json")
 ]
 
-# 初期化
-MV_WT, MV_aKO, MV_bKO, MV_DKO, MV_PTZ, MV_Lam = None, None, None, None, None, None
-TD_WT, TD_aKO, TD_bKO, TD_DKO, TD_PTZ, TD_Lam = None, None, None, None, None, None
-
 # ファイルごとに処理を実行
 for file_name in file_list:
     try:
@@ -33,8 +29,8 @@ for file_name in file_list:
     data_name = (
         os.path.basename(file_name).replace("genotype_", "").replace(".json", "")
     )
-    Ddata_name = f"../{data_name}_Total_Distance.csv"
-    Vdata_name = f"../{data_name}_Average_Velocity.csv"
+    Ddata_name = f"../data/{data_name}_Total_Distance.csv"
+    Vdata_name = f"../data/{data_name}_Average_Velocity.csv"
 
     # データをロード（CSV形式を想定）
     try:
@@ -47,68 +43,23 @@ for file_name in file_list:
         print(f"データファイルが空です: {e}")
         continue
 
-    # サンプル名とジェノタイプの対応表を作成
+    # CSVの列名をJSONから抽出した値に置き換え
     try:
-        genotype_df = pd.DataFrame(
-            {
-                "sample_col": [
-                    f"sample-{int(name.replace('Genotype', ''))}"
-                    for name in genotypes.keys()
-                    if isinstance(name, str) and name.startswith("Genotype")
-                ],
-                "genotype": list(genotypes.values()),
-            }
-        )
-    except ValueError as e:
-        print(f"ジェノタイプデータの処理に失敗しました: {file_name}, エラー: {e}")
+        new_columns = {
+            col: genotypes[col] for col in D.columns if col in genotypes
+        }  # JSONに一致する列名を置き換え
+        D.rename(columns=new_columns, inplace=True)
+        V.rename(columns=new_columns, inplace=True)
+    except KeyError as e:
+        print(f"列名の置き換えに失敗しました: {e}")
         continue
 
-    # 各ジェノタイプに対応する列を抽出
-    def get_columns_by_genotype(df, genotype_df, genotype):
-        cols = genotype_df.loc[genotype_df["genotype"] == genotype, "sample_col"]
-        return [col for col in cols if col in df.columns]
+    # 更新されたCSVを保存
+    try:
+        D.to_csv(Ddata_name, index=False)  # 更新されたCSVを保存
+        V.to_csv(Vdata_name, index=False)
+        print(f"CSVファイルを更新しました: {Ddata_name}, {Vdata_name}")
+    except IOError as e:
+        print(f"CSVファイルの書き込みに失敗しました: {e}")
 
-    wt_cols = get_columns_by_genotype(D, genotype_df, "WT")
-    aKO_cols = get_columns_by_genotype(D, genotype_df, "kcc2aKO")
-    bKO_cols = get_columns_by_genotype(D, genotype_df, "kcc2bKO")
-    DKO_cols = get_columns_by_genotype(D, genotype_df, "kcc2DKO")
-    PTZ_cols = get_columns_by_genotype(D, genotype_df, "PTZ")
-    Lam_cols = get_columns_by_genotype(D, genotype_df, "Lam")
-
-    # 各ジェノタイプのデータを結合
-    MV_WT = pd.concat([MV_WT, V[wt_cols]], axis=1) if MV_WT is not None else V[wt_cols]
-    MV_aKO = (
-        pd.concat([MV_aKO, V[aKO_cols]], axis=1) if MV_aKO is not None else V[aKO_cols]
-    )
-    MV_bKO = (
-        pd.concat([MV_bKO, V[bKO_cols]], axis=1) if MV_bKO is not None else V[bKO_cols]
-    )
-    MV_DKO = (
-        pd.concat([MV_DKO, V[DKO_cols]], axis=1) if MV_DKO is not None else V[DKO_cols]
-    )
-    MV_PTZ = (
-        pd.concat([MV_PTZ, V[PTZ_cols]], axis=1) if MV_PTZ is not None else V[PTZ_cols]
-    )
-    MV_Lam = (
-        pd.concat([MV_Lam, V[Lam_cols]], axis=1) if MV_Lam is not None else V[Lam_cols]
-    )
-
-    TD_WT = pd.concat([TD_WT, D[wt_cols]], axis=1) if TD_WT is not None else D[wt_cols]
-    TD_aKO = (
-        pd.concat([TD_aKO, D[aKO_cols]], axis=1) if TD_aKO is not None else D[aKO_cols]
-    )
-    TD_bKO = (
-        pd.concat([TD_bKO, D[bKO_cols]], axis=1) if TD_bKO is not None else D[bKO_cols]
-    )
-    TD_DKO = (
-        pd.concat([TD_DKO, D[DKO_cols]], axis=1) if TD_DKO is not None else D[DKO_cols]
-    )
-    TD_PTZ = (
-        pd.concat([TD_PTZ, D[PTZ_cols]], axis=1) if TD_PTZ is not None else D[PTZ_cols]
-    )
-    TD_Lam = (
-        pd.concat([TD_Lam, D[Lam_cols]], axis=1) if TD_Lam is not None else D[Lam_cols]
-    )
-
-# 結果の確認（必要に応じて保存や出力を追加）
 print("処理が完了しました。")
