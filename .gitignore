@@ -53,3 +53,9 @@ rsconnect/
 
 # csv files
 *.csv
+
+# data
+data
+
+# genotype
+genotype

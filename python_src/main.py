@@ -5,6 +5,12 @@ import pandas as pd
 
 # フォルダパスの設定
 folder_path = "../genotype"
+
+# フォルダが存在するか確認
+if not os.path.exists(folder_path) or not os.path.isdir(folder_path):
+    raise FileNotFoundError(f"指定されたフォルダが存在しません: {folder_path}")
+
+# JSONファイルのリストを取得
 file_list = [
     os.path.join(folder_path, f) for f in os.listdir(folder_path) if f.endswith(".json")
 ]
@@ -15,31 +21,47 @@ TD_WT, TD_aKO, TD_bKO, TD_DKO, TD_PTZ, TD_Lam = None, None, None, None, None, No
 
 # ファイルごとに処理を実行
 for file_name in file_list:
-    # JSONファイルを読み込み
-    with open(file_name, "r", encoding="utf-8") as f:
-        genotypes = json.load(f)
+    try:
+        # JSONファイルを読み込み
+        with open(file_name, "r", encoding="utf-8") as f:
+            genotypes = json.load(f)
+    except json.JSONDecodeError as e:
+        print(f"JSONファイルの読み込みに失敗しました: {file_name}, エラー: {e}")
+        continue
 
     # データ名を抽出
     data_name = (
         os.path.basename(file_name).replace("genotype_", "").replace(".json", "")
     )
-    Ddata_name = f"{data_name}_Total_Distance"
-    Vdata_name = f"{data_name}_Average_Velocity"
+    Ddata_name = f"../{data_name}_Total_Distance.csv"
+    Vdata_name = f"../{data_name}_Average_Velocity.csv"
 
-    # データをロード（pickle形式を想定）
-    D = pd.read_pickle(Ddata_name)
-    V = pd.read_pickle(Vdata_name)
+    # データをロード（CSV形式を想定）
+    try:
+        D = pd.read_csv(Ddata_name)  # CSVファイルを読み込み
+        V = pd.read_csv(Vdata_name)  # CSVファイルを読み込み
+    except FileNotFoundError as e:
+        print(f"データファイルが見つかりません: {e}")
+        continue
+    except pd.errors.EmptyDataError as e:
+        print(f"データファイルが空です: {e}")
+        continue
 
     # サンプル名とジェノタイプの対応表を作成
-    genotype_df = pd.DataFrame(
-        {
-            "sample_col": [
-                f"sample-{int(name.replace('Genotype', ''))}"
-                for name in genotypes.keys()
-            ],
-            "genotype": list(genotypes.values()),
-        }
-    )
+    try:
+        genotype_df = pd.DataFrame(
+            {
+                "sample_col": [
+                    f"sample-{int(name.replace('Genotype', ''))}"
+                    for name in genotypes.keys()
+                    if isinstance(name, str) and name.startswith("Genotype")
+                ],
+                "genotype": list(genotypes.values()),
+            }
+        )
+    except ValueError as e:
+        print(f"ジェノタイプデータの処理に失敗しました: {file_name}, エラー: {e}")
+        continue
 
     # 各ジェノタイプに対応する列を抽出
     def get_columns_by_genotype(df, genotype_df, genotype):
