@@ -43,15 +43,24 @@ for file_name in file_list:
         print(f"データファイルが空です: {e}")
         continue
 
-    # CSVの列名をJSONから抽出した値に置き換え
+    # CSVの列名をJSONから抽出した値に順番に置き換え（col1を飛ばしてcol2以降）
     try:
+        json_values = list(genotypes.values())  # JSONの値をリスト化
         new_columns = {
-            col: genotypes[col] for col in D.columns if col in genotypes
-        }  # JSONに一致する列名を置き換え
+            col: json_values[i]  # JSONの値に基づいて置き換え
+            if col.startswith("sample-") and i < len(json_values)
+            else col
+            for i, col in enumerate(D.columns[1:], start=0)  # col1を飛ばす
+        }
+        # col1を維持しつつ、他の列を置き換え
+        new_columns = {D.columns[0]: D.columns[0], **new_columns}
         D.rename(columns=new_columns, inplace=True)
         V.rename(columns=new_columns, inplace=True)
     except KeyError as e:
         print(f"列名の置き換えに失敗しました: {e}")
+        continue
+    except IndexError as e:
+        print(f"JSONの要素数が不足しています: {e}")
         continue
 
     # 更新されたCSVを保存
